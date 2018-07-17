@@ -2,8 +2,8 @@ package main
 
 import (
 	"campusMonitorSysterm/models"
+	_ "campusMonitorSysterm/routers"
 	"fmt"
-	_ "gree/push_svr/campusMonitorSysterm/routers"
 
 	_ "github.com/Go-SQL-Driver/MySQL"
 	"github.com/astaxie/beego"

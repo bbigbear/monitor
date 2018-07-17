@@ -1,7 +1,7 @@
 package routers
 
 import (
-	"gree/push_svr/campusMonitorSysterm/controllers"
+	"campusMonitorSysterm/controllers"
 
 	"github.com/astaxie/beego"
 )

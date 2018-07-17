@@ -3,6 +3,8 @@ package controllers
 import (
 	"campusMonitorSysterm/models"
 	"fmt"
+	"math"
+	"time"
 
 	"github.com/astaxie/beego"
 
@@ -16,19 +18,34 @@ type WarnController struct {
 
 func (this *WarnController) GetTotalWarnAndHandleWarnData() {
 	o := orm.NewOrm()
-	warn := new(models.Warn)
-	query := o.QueryTable(warn)
 	style := this.Input().Get("style")
 	var maps []orm.Params
+	nowtime := time.Now().Format("2006-01-02 15:04:05")
 	switch style {
 	case "day":
-
+		_, err := o.Raw("select * from warn WHERE warn_time between DATE_SUB(?,INTERVAL 1 DAY) and ?", nowtime, nowtime).Values(&maps)
+		if err != nil {
+			fmt.Println("get warn 1 day err!", err.Error())
+		}
 	case "week":
+		_, err := o.Raw("select * from warn WHERE warn_time between DATE_SUB(?,INTERVAL 1 WEEK) and ?", nowtime, nowtime).Values(&maps)
+		if err != nil {
+			fmt.Println("get warn 1 week err!", err.Error())
+		}
 	case "mouth":
+		_, err := o.Raw("select * from warn WHERE warn_time between DATE_SUB(?,INTERVAL 1 MONTH) and ?", nowtime, nowtime).Values(&maps)
+		if err != nil {
+			fmt.Println("get warn 1 day err!", err.Error())
+		}
 	case "year":
+		_, err := o.Raw("select * from warn WHERE warn_time between DATE_SUB(?,INTERVAL 1 YEAR) and ?", nowtime, nowtime).Values(&maps)
+		if err != nil {
+			fmt.Println("get warn 1 day err!", err.Error())
+		}
 	default:
 		this.ajaxMsg("请输入正确的类型", MSG_ERR_Param)
 	}
+	this.ajaxList("获取信息成功", MSG_OK, int64(len(maps)), maps)
 }
 
 func (this *WarnController) GetWarnData() {
