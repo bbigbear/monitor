@@ -19,7 +19,9 @@ type WarnController struct {
 func (this *WarnController) GetTotalWarnAndHandleWarnData() {
 	o := orm.NewOrm()
 	style := this.Input().Get("style")
+	out := make(map[string]interface{})
 	var maps []orm.Params
+	var handleMaps []orm.Params
 	nowtime := time.Now().Format("2006-01-02 15:04:05")
 	switch style {
 	case "day":
@@ -32,7 +34,7 @@ func (this *WarnController) GetTotalWarnAndHandleWarnData() {
 		if err != nil {
 			fmt.Println("get warn 1 week err!", err.Error())
 		}
-	case "mouth":
+	case "month":
 		_, err := o.Raw("select * from warn WHERE warn_time between DATE_SUB(?,INTERVAL 1 MONTH) and ?", nowtime, nowtime).Values(&maps)
 		if err != nil {
 			fmt.Println("get warn 1 day err!", err.Error())
@@ -45,7 +47,17 @@ func (this *WarnController) GetTotalWarnAndHandleWarnData() {
 	default:
 		this.ajaxMsg("请输入正确的类型", MSG_ERR_Param)
 	}
-	this.ajaxList("获取信息成功", MSG_OK, int64(len(maps)), maps)
+	fmt.Println("maps len", len(maps))
+	for _, m := range maps {
+		fmt.Println("status", m)
+		fmt.Println("status", m["status"].(string))
+		if m["status"].(string) == "已处理" {
+			handleMaps = append(handleMaps, m)
+		}
+	}
+	out["total"] = maps
+	out["handle"] = handleMaps
+	this.ajaxList("获取信息成功", MSG_OK, int64(len(maps)), out)
 }
 
 func (this *WarnController) GetWarnData() {
@@ -65,9 +77,9 @@ func (this *WarnController) GetWarnData() {
 	style := this.Input().Get("style")
 	if style != "" {
 		ws := new(models.WarnStyle)
-		exist := o.QueryTable(ws).Filter("Style", style).Exist()
+		exist := o.QueryTable(ws).Filter("Name", style).Exist()
 		if exist {
-			query = query.Filter("Style", style)
+			query = query.Filter("WarnName", style)
 		} else {
 			this.ajaxMsg("不存在该类型", MSG_ERR_Param)
 		}
@@ -108,10 +120,92 @@ func (this *WarnController) GetWarnData() {
 		fmt.Println("index&pagemax&pagenum", index, pagemax, pagenum)
 	}
 	query = query.Limit(pagemax, (index-1)*pagemax)
-	_, err1 := query.OrderBy("-CreatTime").Values(&maps)
+	_, err1 := query.OrderBy("-WarnTime").Values(&maps)
 	if err1 != nil {
 		fmt.Println("获取预警信息失败")
 		this.ajaxMsg("获取预警信息失败", MSG_ERR_Resources)
 	}
 	this.ajaxList("获取预警信息成功", MSG_OK, count, maps)
+}
+
+//获取前几位
+func (this *WarnController) GetRank() {
+
+	fmt.Println("获取排名")
+	o := orm.NewOrm()
+	warn := new(models.Warn)
+	//query := o.QueryTable(warn)
+	var maps []orm.Params
+
+	//获取token
+	token := this.Input().Get("token")
+	if token == "" {
+		fmt.Println("token 为空")
+		this.ajaxMsg("token is not nil", MSG_ERR_Param)
+	}
+	appkey := beego.AppConfig.String("appkey")
+	name, err := this.Token_auth(token, appkey)
+	if err != nil {
+		fmt.Println("token err", err)
+		this.ajaxMsg("token err!", MSG_ERR_Verified)
+	}
+	fmt.Println("当前访问用户为:", name)
+
+	//state 1[个人]2[类型]
+	state := this.Input().Get("state")
+	if state == "" {
+		this.ajaxMsg("state不能为空", MSG_ERR_Param)
+	}
+	if state == "1" {
+		//获取排名数量
+		count, err := this.GetInt("count")
+		if err != nil {
+			this.ajaxMsg("count为int类型", MSG_ERR_Param)
+		}
+		if count == 0 {
+			this.ajaxMsg("count不能为空", MSG_ERR_Param)
+		}
+		_, err1 := o.Raw("SELECT sname , warn_name , warn_info , count( * ) AS count FROM warn GROUP BY sname ORDER BY count DESC LIMIT ?", count).Values(&maps)
+		if err1 != nil {
+			fmt.Println("get student rank info err!", err.Error())
+		}
+
+	} else if state == "2" {
+		_, err2 := o.Raw("SELECT warn_name , warn_info , count( * ) AS count FROM warn GROUP BY warn_name ORDER BY count DESC").Values(&maps)
+		if err2 != nil {
+			fmt.Println("get style rank info err!", err.Error())
+		}
+	} else {
+		this.ajaxMsg("state err", MSG_ERR_Param)
+	}
+
+	//total
+	total, err := o.QueryTable(warn).Count()
+	if err != nil {
+		fmt.Println("mysql get count err", err.Error())
+		this.ajaxMsg("内部错误", MSG_ERR)
+	}
+
+	this.ajaxList("获取预警信息成功", MSG_OK, total, maps)
+}
+
+//获取预警类型
+func (this *WarnController) GetWarnStyle() {
+
+	fmt.Println("获取预警类型")
+	o := orm.NewOrm()
+	warn := new(models.WarnStyle)
+	var maps orm.ParamsList
+
+	//获取token
+	token := this.Input().Get("token")
+	if token == "" {
+		fmt.Println("token 为空")
+		this.ajaxMsg("token is not nil", MSG_ERR_Param)
+	}
+	num, err := o.QueryTable(warn).Distinct().ValuesFlat(&maps, "name")
+	if err != nil {
+		fmt.Println("get warn style err", err.Error())
+	}
+	this.ajaxList("获取预警类型成功", MSG_OK, num, maps)
 }
