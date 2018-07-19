@@ -18,11 +18,25 @@ type WarnController struct {
 
 func (this *WarnController) GetTotalWarnAndHandleWarnData() {
 	o := orm.NewOrm()
-	style := this.Input().Get("style")
 	out := make(map[string]interface{})
 	var maps []orm.Params
 	var handleMaps []orm.Params
+	//获取token
+	token := this.Input().Get("token")
+	if token == "" {
+		fmt.Println("token 为空")
+		this.ajaxMsg("token is not nil", MSG_ERR_Param)
+	}
+	appkey := beego.AppConfig.String("appkey")
+	name, err := this.Token_auth(token, appkey)
+	if err != nil {
+		fmt.Println("token err", err)
+		this.ajaxMsg("token err!", MSG_ERR_Verified)
+	}
+	fmt.Println("当前访问用户为:", name)
 	nowtime := time.Now().Format("2006-01-02 15:04:05")
+
+	style := this.Input().Get("style")
 	switch style {
 	case "day":
 		_, err := o.Raw("select * from warn WHERE warn_time between DATE_SUB(?,INTERVAL 1 DAY) and ?", nowtime, nowtime).Values(&maps)
@@ -73,6 +87,13 @@ func (this *WarnController) GetWarnData() {
 		fmt.Println("token 为空")
 		this.ajaxMsg("token is not nil", MSG_ERR_Param)
 	}
+	appkey := beego.AppConfig.String("appkey")
+	name, err := this.Token_auth(token, appkey)
+	if err != nil {
+		fmt.Println("token err", err)
+		this.ajaxMsg("token err!", MSG_ERR_Verified)
+	}
+	fmt.Println("当前访问用户为:", name)
 	//获取预警类型
 	style := this.Input().Get("style")
 	if style != "" {
@@ -84,13 +105,11 @@ func (this *WarnController) GetWarnData() {
 			this.ajaxMsg("不存在该类型", MSG_ERR_Param)
 		}
 	}
-	appkey := beego.AppConfig.String("appkey")
-	name, err := this.Token_auth(token, appkey)
-	if err != nil {
-		fmt.Println("token err", err)
-		this.ajaxMsg("token err!", MSG_ERR_Verified)
+	//获取类型
+	status := this.Input().Get("status")
+	if status != "" {
+		query = query.Filter("Status", status)
 	}
-	fmt.Println("当前访问用户为:", name)
 
 	var maps []orm.Params
 
@@ -203,6 +222,14 @@ func (this *WarnController) GetWarnStyle() {
 		fmt.Println("token 为空")
 		this.ajaxMsg("token is not nil", MSG_ERR_Param)
 	}
+	appkey := beego.AppConfig.String("appkey")
+	name, err := this.Token_auth(token, appkey)
+	if err != nil {
+		fmt.Println("token err", err)
+		this.ajaxMsg("token err!", MSG_ERR_Verified)
+	}
+	fmt.Println("当前访问用户为:", name)
+
 	num, err := o.QueryTable(warn).Distinct().ValuesFlat(&maps, "name")
 	if err != nil {
 		fmt.Println("get warn style err", err.Error())
