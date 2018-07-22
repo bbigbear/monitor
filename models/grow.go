@@ -57,13 +57,14 @@ type Consume struct {
 	Sid         string
 	Sname       string
 	Style       string
-	money       float64
+	Money       float64
 	ConsumeTime time.Time
 }
 
 //学生
 type Student struct {
 	Id                int64
+	Sid               string
 	Name              string
 	Major             string
 	Faculty           string

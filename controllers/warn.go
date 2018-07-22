@@ -39,36 +39,52 @@ func (this *WarnController) GetTotalWarnAndHandleWarnData() {
 	style := this.Input().Get("style")
 	switch style {
 	case "day":
-		_, err := o.Raw("select * from warn WHERE warn_time between DATE_SUB(?,INTERVAL 1 DAY) and ?", nowtime, nowtime).Values(&maps)
+		_, err := o.Raw("select HOUR(warn_time) as hour,warn_name,COUNT(*) as count from warn WHERE warn_time between DATE_SUB(?,INTERVAL 1 DAY) and ? GROUP BY hour;", nowtime, nowtime).Values(&maps)
 		if err != nil {
 			fmt.Println("get warn 1 day err!", err.Error())
 		}
+		_, err1 := o.Raw("select HOUR(warn_time) as hour,warn_name,COUNT(*) as count from warn WHERE warn_time between DATE_SUB(?,INTERVAL 1 DAY) and ? and status = '已处理' GROUP BY hour;", nowtime, nowtime).Values(&handleMaps)
+		if err1 != nil {
+			fmt.Println("get handle warn 1 day err!", err.Error())
+		}
 	case "week":
-		_, err := o.Raw("select * from warn WHERE warn_time between DATE_SUB(?,INTERVAL 1 WEEK) and ?", nowtime, nowtime).Values(&maps)
+		_, err := o.Raw("select DAY(warn_time) as day,warn_name,COUNT(*) as count from warn WHERE warn_time between DATE_SUB(?,INTERVAL 1 WEEK) and ? GROUP BY day;", nowtime, nowtime).Values(&maps)
 		if err != nil {
 			fmt.Println("get warn 1 week err!", err.Error())
 		}
+		_, err1 := o.Raw("select DAY(warn_time) as day,warn_name,COUNT(*) as count from warn WHERE warn_time between DATE_SUB(?,INTERVAL 1 WEEK) and ? and status = '已处理' GROUP BY day;", nowtime, nowtime).Values(&handleMaps)
+		if err1 != nil {
+			fmt.Println("get handle warn 1 week err!", err.Error())
+		}
 	case "month":
-		_, err := o.Raw("select * from warn WHERE warn_time between DATE_SUB(?,INTERVAL 1 MONTH) and ?", nowtime, nowtime).Values(&maps)
+		_, err := o.Raw("select DAY(warn_time) as day,warn_name,COUNT(*) as count from warn WHERE warn_time between DATE_SUB(?,INTERVAL 1 MONTH) and ? GROUP BY day;", nowtime, nowtime).Values(&maps)
 		if err != nil {
-			fmt.Println("get warn 1 day err!", err.Error())
+			fmt.Println("get warn 1 month err!", err.Error())
+		}
+		_, err1 := o.Raw("select DAY(warn_time) as day,warn_name,COUNT(*) as count from warn WHERE warn_time between DATE_SUB(?,INTERVAL 1 MONTH) and ? and status = '已处理' GROUP BY day;", nowtime, nowtime).Values(&handleMaps)
+		if err1 != nil {
+			fmt.Println("get handle month 1 day err!", err.Error())
 		}
 	case "year":
-		_, err := o.Raw("select * from warn WHERE warn_time between DATE_SUB(?,INTERVAL 1 YEAR) and ?", nowtime, nowtime).Values(&maps)
+		_, err := o.Raw("select MONTH(warn_time) as month,warn_name,COUNT(*) as count from warn WHERE warn_time between DATE_SUB(?,INTERVAL 1 YEAR) and ? GROUP BY month;", nowtime, nowtime).Values(&maps)
 		if err != nil {
-			fmt.Println("get warn 1 day err!", err.Error())
+			fmt.Println("get warn 1 year err!", err.Error())
+		}
+		_, err1 := o.Raw("select MONTH(warn_time) as month,warn_name,COUNT(*) as count from warn WHERE warn_time between DATE_SUB(?,INTERVAL 1 YEAR) and ? and status = '已处理' GROUP BY month;", nowtime, nowtime).Values(&handleMaps)
+		if err1 != nil {
+			fmt.Println("get handle warn 1 year err!", err.Error())
 		}
 	default:
 		this.ajaxMsg("请输入正确的类型", MSG_ERR_Param)
 	}
 	fmt.Println("maps len", len(maps))
-	for _, m := range maps {
-		fmt.Println("status", m)
-		fmt.Println("status", m["status"].(string))
-		if m["status"].(string) == "已处理" {
-			handleMaps = append(handleMaps, m)
-		}
-	}
+	//	for _, m := range maps {
+	//		fmt.Println("status", m)
+	//		fmt.Println("status", m["status"].(string))
+	//		if m["status"].(string) == "已处理" {
+	//			handleMaps = append(handleMaps, m)
+	//		}
+	//	}
 	out["total"] = maps
 	out["handle"] = handleMaps
 	this.ajaxList("获取信息成功", MSG_OK, int64(len(maps)), out)
