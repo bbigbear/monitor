@@ -18,4 +18,8 @@ func init() {
 	beego.Router("/api/v1/grow/growth_record", &controllers.GrowController{}, "*:GrowthRecord")
 	beego.Router("/api/v1/grow/excellent_portrait", &controllers.GrowController{}, "*:ExcellentStudentPortrait")
 	beego.Router("/api/v1/grow/get_student_info", &controllers.GrowController{}, "*:StudentInformation")
+
+	//后台管理
+	beego.Router("/v1/manage", &controllers.ManageController{})
+	beego.Router("/v1/warn/getwarndata", &controllers.ManageController{}, "*:GetWarnData")
 }
