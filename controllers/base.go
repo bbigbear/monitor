@@ -236,7 +236,6 @@ func (this *BaseController) GenToken(user string) string {
 	if err != nil {
 		fmt.Println("err:", err.Error())
 		return ""
-
 	}
 	return s
 }

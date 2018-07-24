@@ -200,7 +200,7 @@ func (this *WarnController) GetRank() {
 		if count == 0 {
 			this.ajaxMsg("count不能为空", MSG_ERR_Param)
 		}
-		_, err1 := o.Raw("SELECT sname , warn_name , warn_info , count( * ) AS count FROM warn GROUP BY sname ORDER BY count DESC LIMIT ?", count).Values(&maps)
+		_, err1 := o.Raw("SELECT sname ,major,faculty,year, warn_name , warn_info , count( * ) AS count FROM warn a INNER JOIN student b on a.studentid=b.sid GROUP BY sname ORDER BY count DESC LIMIT ?", count).Values(&maps)
 		if err1 != nil {
 			fmt.Println("get student rank info err!", err.Error())
 		}
@@ -220,7 +220,6 @@ func (this *WarnController) GetRank() {
 		fmt.Println("mysql get count err", err.Error())
 		this.ajaxMsg("内部错误", MSG_ERR)
 	}
-
 	this.ajaxList("获取预警信息成功", MSG_OK, total, maps)
 }
 

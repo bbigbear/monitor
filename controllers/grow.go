@@ -303,11 +303,11 @@ func (this *GrowController) GrowthTargets() {
 			fmt.Println("get style score err!", err.Error())
 		}
 	case "阅读":
-		_, err := o.Raw("SELECT sid,sname,COUNT(*) as count FROM read GROUP BY sname ORDER BY count(*) DESC LIMIT ?;", count).Values(&maps)
+		_, err := o.Raw("SELECT sid,sname,COUNT(*) as count FROM monitor.read GROUP BY sname ORDER BY count(*) DESC LIMIT ?;", count).Values(&maps)
 		if err != nil {
 			fmt.Println("get style score err!", err.Error())
 		}
-		_, err1 := o.Raw("SELECT sid,sname,COUNT(*) as count FROM read WHERE sid='001';").Values(&my_maps)
+		_, err1 := o.Raw("SELECT sid,sname,COUNT(*) as count FROM monitor.read WHERE sid='001';").Values(&my_maps)
 		if err1 != nil {
 			fmt.Println("get style score err!", err.Error())
 		}
@@ -373,7 +373,11 @@ func (this *GrowController) StudentInformation() {
 		this.ajaxMsg("token err!", MSG_ERR_Verified)
 	}
 	fmt.Println("当前访问用户为:", name)
-	sid := "001"
+	//获取sid
+	sid := this.Input().Get("sid")
+	if sid == "" {
+		sid = "001"
+	}
 	//学生信息
 	_, err11 := o.Raw("SELECT *  FROM student WHERE sid = ?", sid).Values(&my_maps)
 	if err11 != nil {
@@ -412,7 +416,7 @@ func (this *GrowController) StudentInformation() {
 	}
 	out["discipline"] = my_maps
 	//消费
-	_, err10 := o.Raw("SELECT SUM(money) as count FROM consume WHERE sid = ?", sid).Values(&my_maps)
+	_, err10 := o.Raw("SELECT SUM(money) as count , AVG(money) as avg FROM consume WHERE sid = ?", sid).Values(&my_maps)
 	if err10 != nil {
 		fmt.Println("get consume err!", err.Error())
 	}

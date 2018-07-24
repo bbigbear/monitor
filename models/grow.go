@@ -68,5 +68,18 @@ type Student struct {
 	Name              string
 	Major             string
 	Faculty           string
+	Position          string
+	Level             string
+	Identity          string
 	BriefIntroduction string
+	PicUrl            string
+	Year              int
+}
+
+//监控
+type WarnSetting struct {
+	Id        int64
+	Style     string
+	Count     int16
+	Condition string
 }
