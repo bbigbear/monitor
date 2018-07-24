@@ -25,5 +25,8 @@ func init() {
 	beego.Router("/v1/warn_histroy", &controllers.ManageController{}, "*:WarnHistroy")
 	beego.Router("/v1/warn_setting", &controllers.ManageController{}, "*:Setting")
 	beego.Router("/v1/warn/getwarndata", &controllers.ManageController{}, "*:GetWarnData")
+	beego.Router("/v1/warn/change", &controllers.ManageController{}, "post:ChangeStatus")
+	beego.Router("/v1/warn/change_remark", &controllers.ManageController{}, "post:ChangeRemark")
 	beego.Router("/v1/warn/del", &controllers.ManageController{}, "post:DelMultiData")
+	beego.Router("/v1/warn/updata", &controllers.ManageController{}, "post:UpdateSetting")
 }

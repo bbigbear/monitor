@@ -86,19 +86,23 @@
 		<hr class="layui-bg-green">
 		<i class="layui-icon layui-icon-delete" style="font-size: 20px; color: #FF5722" id="del"></i>
 		<table id="dishList" lay-filter="room"></table>
+		<script type="text/html" id="barDemo">
+			{{#  if(d.Status =="待处理"){ }}
+				<a class="layui-btn layui-btn-normal layui-btn-xs" lay-event="handle">已处理</a>
+			{{# } }}
+		</script>
 		<hr class="layui-bg-green">		
 	</div>
   </div>
   
   <div class="layui-footer">
     <!-- 底部固定区域 -->
-    ©2018 智慧校园. All Rights Reserved
+    ©2018 奚米. All Rights Reserved
   </div>
-</div>
-
+</div>	
 <script src="/static/layui.js"></script>
 <!--<script src="http://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js"></script>-->
-<script src="http://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
 <script src="https://cdn.bootcss.com/jquery-cookie/1.4.1/jquery.cookie.js"></script>
 <script src="https://cdn.bootcss.com/Base64/1.0.1/base64.js"></script>
 <script>
@@ -117,17 +121,65 @@
 	    ,url: '/v1/warn/getwarndata?token='+$.cookie('token')//数据接口
 	    ,page: true //开启分页
 		,id: 'listReload'
-		,size: 'sm'
+		,size: 'lg'
 	    ,cols: [[ //表头
 		  {type:'checkbox'}
 		  ,{field:'Sname', title:'姓名', width:100}
 		  ,{field:'WarnName',  title:'预警类型', width:120}
 	      ,{field:'WarnTime',  title:'预警时间', width:200}
 		  ,{field:'WarnInfo',  title:'预警描述', width:250}
-		  ,{field:'Remark',  title:'备注', width:250}
+		  ,{field:'Remark',  title:'备注', width:250, event:'setSign',style:'cursor: pointer;'}
 		  ,{field:'Status',  title:'预警状态', width:120}
+		  ,{fixed: 'right', title:'操作',width:150, align:'center', toolbar: '#barDemo'}
 	    ]]
-	  });	
+	  });
+		//监听工具条
+		table.on('tool(room)', function(obj){ //注：tool是工具条事件名，test是table原始容器的属性 lay-filter="对应的值"
+		    var data = obj.data //获得当前行数据
+		    ,layEvent = obj.event; //获得 lay-event 对应的值
+		    if(layEvent === 'handle'){	
+				layer.confirm('确定为已处理？', function(index){
+			        var jsData={'id':data.Id,'status':"已处理"}
+					$.post('/v1/warn/change', jsData, function (out) {
+		                if (out.code == 200) {
+		                    layer.alert('已处理', {icon: 1},function(index){
+		                        layer.close(index);
+		                        location.reload();
+		                    });
+		                } else {
+		                    layer.msg(out.message)
+		                }
+		            }, "json");
+			        layer.close(index);
+		      	});
+	    	}else if(layEvent === 'setSign'){
+		      layer.prompt({
+		        formType: 2
+		        ,title: '修改备注内容'
+		        ,value: data.sign
+		      }, function(value, index){
+		        layer.close(index);
+		        
+		        //这里一般是发送修改的Ajax请求
+		        var jsData={'id':data.Id,'remark':value}
+					$.post('/v1/warn/change_remark', jsData, function (out) {
+		                if (out.code == 200) {
+		                    layer.alert('已处理', {icon: 1},function(index){
+		                        layer.close(index);
+		                        location.reload();
+		                    });
+		                } else {
+		                    layer.msg(out.message)
+		                }
+		            }, "json");
+			    layer.close(index);
+		        //同步更新表格和缓存对应的值
+		        //obj.update({
+		          //sign: value
+		        //});
+		      });
+		    }
+	 	});	
 		//查询
 	 	$('#query').on('click',function(){ 
            	var style = $("#style").val()

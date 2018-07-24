@@ -6,6 +6,7 @@ import (
 	"math"
 	"time"
 
+	"encoding/json"
 	"strconv"
 	"strings"
 
@@ -32,6 +33,14 @@ func (this *ManageController) WarnHistroy() {
 }
 
 func (this *ManageController) Setting() {
+	o := orm.NewOrm()
+	setting := new(models.WarnSetting)
+	var maps []orm.Params
+	_, err := o.QueryTable(setting).Filter("Id", 1).Values(&maps)
+	if err != nil {
+		fmt.Println("get setting err", err.Error())
+	}
+	this.Data["m"] = maps
 	this.TplName = "warn_setting.tpl"
 }
 
@@ -147,4 +156,116 @@ func (this *ManageController) DelMultiData() {
 	//list["data"] = maps
 	this.ajaxMsg("删除成功", MSG_OK)
 	return
+}
+
+//设置预警阀值
+
+func (this *ManageController) UpdateSetting() {
+	fmt.Println("更新预警设置")
+	o := orm.NewOrm()
+	//list := make(map[string]interface{})
+	var setting models.WarnSetting
+	json.Unmarshal(this.Ctx.Input.RequestBody, &setting)
+	fmt.Println("setting_info:", &setting)
+	setting.Id = 1
+	style := setting.Style
+	switch style {
+	case "设置预警通知方式":
+		_, err := o.Update(&setting, "Tzfs")
+		if err != nil {
+			this.ajaxMsg("更新失败", MSG_ERR_Resources)
+		}
+	case "学业预警":
+		_, err := o.Update(&setting, "XyyjZcj", "XyyjDkcj")
+		if err != nil {
+			this.ajaxMsg("更新失败", MSG_ERR_Resources)
+		}
+	case "一卡通消费预警":
+		_, err := o.Update(&setting, "YktDbxf", "YktDrxf", "YktDyxf")
+		if err != nil {
+			this.ajaxMsg("更新失败", MSG_ERR_Resources)
+		}
+	case "上网预警":
+		_, err := o.Update(&setting, "SwyjCs", "SwyjZsc", "SwyjDcswsc")
+		if err != nil {
+			this.ajaxMsg("更新失败", MSG_ERR_Resources)
+		}
+	case "图书借阅预警":
+		_, err := o.Update(&setting, "TsjySl", "TsjySj")
+		if err != nil {
+			this.ajaxMsg("更新失败", MSG_ERR_Resources)
+		}
+	case "贫困生预警":
+		_, err := o.Update(&setting, "PksYxf")
+		if err != nil {
+			this.ajaxMsg("更新失败", MSG_ERR_Resources)
+		}
+	case "图书馆爆满预警":
+		_, err := o.Update(&setting, "TsgbmRs")
+		if err != nil {
+			this.ajaxMsg("更新失败", MSG_ERR_Resources)
+		}
+	case "挂科预警":
+		_, err := o.Update(&setting, "Gkcs")
+		if err != nil {
+			this.ajaxMsg("更新失败", MSG_ERR_Resources)
+		}
+	default:
+		this.ajaxMsg("请输入正确的类型", MSG_ERR_Param)
+	}
+	this.ajaxMsg("更新成功", MSG_OK)
+}
+
+//更新预警状态
+
+func (this *ManageController) ChangeStatus() {
+	fmt.Println("更新预警状态")
+	//id
+	id, err := this.GetInt("id")
+	if err != nil {
+		this.ajaxMsg("get id err", MSG_ERR_Param)
+	}
+	fmt.Println("id:", id)
+	//status
+	status := this.GetString("status")
+	fmt.Println("status is", status)
+	o := orm.NewOrm()
+	warn := new(models.Warn)
+	//updata status db
+	num, err := o.QueryTable(warn).Filter("Id", id).Update(orm.Params{
+		"Status": status,
+	})
+	if err != nil {
+		fmt.Println("change status err", err.Error())
+		this.ajaxMsg("change status err", MSG_ERR_Resources)
+	}
+	fmt.Println("num", num)
+	this.ajaxMsg("处理成功", MSG_OK)
+}
+
+//更新预警状态
+
+func (this *ManageController) ChangeRemark() {
+	fmt.Println("更新预警")
+	//id
+	id, err := this.GetInt("id")
+	if err != nil {
+		this.ajaxMsg("get id err", MSG_ERR_Param)
+	}
+	fmt.Println("id:", id)
+	//remark
+	remark := this.GetString("remark")
+	fmt.Println("remark is", remark)
+	o := orm.NewOrm()
+	warn := new(models.Warn)
+	//updata status db
+	num, err := o.QueryTable(warn).Filter("Id", id).Update(orm.Params{
+		"Remark": remark,
+	})
+	if err != nil {
+		fmt.Println("change status err", err.Error())
+		this.ajaxMsg("change status err", MSG_ERR_Resources)
+	}
+	fmt.Println("num", num)
+	this.ajaxMsg("处理成功", MSG_OK)
 }

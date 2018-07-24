@@ -78,8 +78,20 @@ type Student struct {
 
 //监控
 type WarnSetting struct {
-	Id        int64
-	Style     string
-	Count     int16
-	Condition string
+	Id         int64
+	Style      string
+	Tzfs       string
+	XyyjZcj    float64
+	XyyjDkcj   float64
+	YktDbxf    float64
+	YktDrxf    float64
+	YktDyxf    float64
+	SwyjCs     int
+	SwyjZsc    float64
+	SwyjDcswsc float64
+	TsjySl     int
+	TsjySj     float64
+	PksYxf     float64
+	TsgbmRs    int
+	Gkcs       int
 }

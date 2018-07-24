@@ -82,13 +82,13 @@
   
   <div class="layui-footer">
     <!-- 底部固定区域 -->
-    ©2018 智慧校园. All Rights Reserved
+    ©2018  奚米. All Rights Reserved
   </div>
 </div>
 
 <script src="/static/layui.js"></script>
 <!--<script src="http://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js"></script>-->
-<script src="http://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
 <script src="https://cdn.bootcss.com/jquery-cookie/1.4.1/jquery.cookie.js"></script>
 <script src="https://cdn.bootcss.com/Base64/1.0.1/base64.js"></script>
 <script>
@@ -108,7 +108,7 @@
 	    ,url: '/v1/warn/getwarndata?status=待处理&token='+$.cookie('token')//数据接口
 	    ,page: true //开启分页
 		,id: 'listReload'
-		,size: 'sm'
+		,size: 'lg'
 	    ,cols: [[ //表头
 		  {type:'checkbox'}
 		  ,{field:'Sname', title:'姓名', width:100}

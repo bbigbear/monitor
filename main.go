@@ -43,5 +43,6 @@ func DBConnection() {
 func RegisterModel() {
 	orm.RegisterModel(new(models.Warn), new(models.Login), new(models.WarnStyle))
 	orm.RegisterModel(new(models.Score), new(models.Read), new(models.Research),
-		new(models.Surfer), new(models.Discipline), new(models.Consume), new(models.Student))
+		new(models.Surfer), new(models.Discipline), new(models.Consume), new(models.Student),
+		new(models.WarnSetting))
 }
